@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Schedule {{ room.name }}</title>
+</head>
+<style>
+    .poster {
+        width: 100px;
+        height: 150px;
+    }
+</style>
+<body>
+    <h1>Расписание зала {{ room.name }}</h1>
+    <ul>
+        {% for schedule in schedules %}
+        <li>
+            <img class="poster" src="{{ schedule.film.poster.url }}" alt="{{ schedule.film.title }}" />
+            {{ schedule.film.title }} --- {{ schedule.slot.time }} --- {{ schedule.slot.date }}
+            <a href="{% url 'seat_selection' schedule.id %}">Выбрать места</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'room_list' %}">Назад к списку залов</a>
+</body>
+</html>

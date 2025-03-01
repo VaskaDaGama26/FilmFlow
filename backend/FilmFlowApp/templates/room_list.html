@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список залов</title>
+</head>
+<body>
+    <h1>Список залов</h1>
+    <ul>
+        {% for room in rooms %}
+            <li><a href="{% url 'room_schedule' room.id %}">{{ room.name }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
