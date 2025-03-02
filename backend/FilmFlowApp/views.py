@@ -13,18 +13,24 @@ def room_schedule(request, room_id):
 
 def seat_selection(request, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id)
-    seats = Seat.objects.filter(schedule=schedule)  # Фильтр по конкретному сеансу
-    
-    seat_map = [[None for _ in range(8)] for _ in range(10)]
-    for seat in seats:
-        seat_map[seat.row-1][seat.number-1] = seat
+    room = schedule.room
+    all_seats = room.generate_seats()
+    reserved_seats = Seat.objects.filter(schedule=schedule)
+    reserved_seats_set = {(seat.row, seat.number) for seat in reserved_seats}
+    seat_map = []
+    for seat in all_seats:
+        seat['reserved'] = (seat['row'], seat['number']) in reserved_seats_set
+        seat_map.append(seat)
 
     return render(request, 'seat_selection.html', {'schedule': schedule, 'seat_map': seat_map})
 
-def book_seat(request, seat_id, schedule_id):
+def book_seat(request, seat_row, seat_number, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id)
-    seat = get_object_or_404(Seat, id=seat_id, schedule=schedule)
-    if not seat.user:
+    room = schedule.room
+    seat, created = Seat.objects.get_or_create(
+        row=seat_row, number=seat_number, schedule=schedule, room=room
+    )
+    if created:
         seat.user = request.user
         seat.save()
     return redirect('seat_selection', schedule_id=schedule.id)

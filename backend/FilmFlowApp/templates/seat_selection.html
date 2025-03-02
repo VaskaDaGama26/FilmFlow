@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Выбор мест для {{ schedule.film.title }}</title>
+    <title>Выбор мест</title>
 </head>
 <body>
-    <h1>Выбор мест для {{ schedule.film.title }}</h1>
+    <h1>Выбор мест для сеанса {{ schedule.film.title }} в зале {{ schedule.room.name }}</h1>
     <table>
-        {% for row in seat_map %}
-            <tr>
-                {% for seat in row %}
-                    <td>
-                        {% if seat %}
-                            {% if seat.user %}
-                                <span style="color: red;">Занято</span>
-                            {% else %}
-                                <a href="{% url 'book_seat' seat.id schedule.id %}">Свободно</a>
-                            {% endif %}
-                        {% else %}
-                            <span>Не установлено</span>
-                        {% endif %}
-                    </td>
-                {% endfor %}
-            </tr>
+        {% for seat in seat_map %}
+            {% if forloop.counter0|divisibleby:8 %}
+                <tr>
+            {% endif %}
+            <td>
+                {% if seat.reserved %}
+                    <button disabled>{{ seat.row }}-{{ seat.number }}</button>
+                {% else %}
+                    <a href="{% url 'book_seat' seat.row seat.number schedule.id %}">
+                        <button>{{ seat.row }}-{{ seat.number }}</button>
+                    </a>
+                {% endif %}
+            </td>
+            {% if forloop.counter0|add:1|divisibleby:8 %}
+                </tr>
+            {% endif %}
         {% endfor %}
     </table>
     <a href="{% url 'room_schedule' schedule.room.id %}">Назад к расписанию</a>

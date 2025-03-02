@@ -6,23 +6,36 @@ class User(models.Model):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name}"
     
 class Slot(models.Model):
     time = models.TimeField()
     date = models.DateField()
 
     def __str__(self):
-        return f"Time:{self.time}, Date:{self.date}"
+        return f"TIME: {self.time}, DATE: {self.date}"
 
 class Room(models.Model):
     name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    def generate_seats(self):
+        seats = []
+        for row in range(1, 11):
+            for number in range(1, 9):
+                seats.append({'row': row, 'number': number})
+        return seats
 
 class Film(models.Model):
     title = models.CharField(max_length=255)
     poster = models.ImageField(upload_to='posters/')
 
     def __str__(self):
-        return f"Title: {self.title}"
+        return f"{self.title}"
     
 class Schedule(models.Model):
     film = models.ForeignKey(Film, on_delete=models.CASCADE)
@@ -30,7 +43,7 @@ class Schedule(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Film:{self.film}, Slot:{self.slot}, Room:{self.room}"
+        return f"{self.film}, {self.slot}"
 
 class Seat(models.Model):
     row = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
@@ -40,7 +53,7 @@ class Seat(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE,default=1) 
 
     def __str__(self):
-        return f"Row: {self.row}, Seat: {self.number}, Schedule: {self.schedule.id}"
+        return f"ROW: {self.row}, SEAT: {self.number}, SCHEDULE: {self.schedule}"
 
 
 

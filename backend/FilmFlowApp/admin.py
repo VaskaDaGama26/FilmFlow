@@ -11,7 +11,7 @@ class RoomAdmin(admin.ModelAdmin):
 
 class SeatAdmin(admin.ModelAdmin):
     list_display = ('row', 'number', 'user', 'room', 'schedule')
-    list_filter = ('user', 'room', 'schedule')
+    list_filter = ('user', 'schedule__film', 'schedule__slot__time', 'schedule__slot__date', 'row', 'number', 'room')
     search_fields = ('row', 'number', 'user__name', 'schedule')
 
 class FilmAdmin(admin.ModelAdmin):
@@ -20,6 +20,7 @@ class FilmAdmin(admin.ModelAdmin):
 
 class SlotAdmin(admin.ModelAdmin):
     list_display = ('time', 'date')
+    list_filter = ('time', 'date')
     search_fields = ('time', 'date')
 
 class ScheduleAdmin(admin.ModelAdmin):
