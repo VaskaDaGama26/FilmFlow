@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Мои билеты</title>
+    <style>
+        .past {
+            color: grey;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Привет, {{ user.username }}</h2>
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Выйти</button>
+    </form>
+    <h1>Мои билеты</h1>
+    <a href="{% url 'room_list' %}">Назад к списку залов</a>
+    {% if grouped_seats %}
+    {% for date, day_seats in grouped_seats.items %}
+    <h4>{{ date }}</h4>
+    <ul>
+        {% for seat in day_seats %}
+        <li class="{% if seat.schedule.session.date <= yesterday %}past{% endif %}">
+            {{ seat.schedule.session.time }}:
+            Фильм: {{ seat.schedule.session.film.title }},
+            Зал: {{ seat.schedule.room.name }},
+            Ряд: {{ seat.row }},
+            Место: {{ seat.number }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+    {% else %}
+    <p>У вас нет забронированных билетов.</p>
+    {% endif %}
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Schedule {{ room.name }}</title>
 </head>
@@ -9,17 +10,35 @@
         height: 150px;
     }
 </style>
+
 <body>
     <h1>Расписание зала {{ room.name }}</h1>
-    <ul>
-        {% for schedule in schedules %}
-        <li>
-            <img class="poster" src="{{ schedule.film.poster.url }}" alt="{{ schedule.film.title }}" />
-            {{ schedule.film.title }} --- {{ schedule.slot.time }} --- {{ schedule.slot.date }}
-            <a href="{% url 'seat_selection' schedule.id %}">Выбрать места</a>
-        </li>
-        {% endfor %}
-    </ul>
     <a href="{% url 'room_list' %}">Назад к списку залов</a>
+    {% if grouped_schedules %}
+    <div style="display: flex; flex-direction: row;">
+    {% for date, day_schedules in grouped_schedules.items %}
+    <div style="display: flex; flex-direction: column; max-width: 50%;">
+        <h2>{{ date }}</h2>
+        <ul style="padding: 0;">
+            {% for schedule in day_schedules %}
+            <li style="display: flex; align-items: center; padding: 1rem;">
+                <img class="poster" src="{{ schedule.session.film.poster.url }}"
+                    alt="{{ schedule.session.film.title }}" />
+                <div style="display: flex; flex-direction: column; margin-left: 1rem;">
+                    <p style="margin: 0;">{{ schedule.session.film.title }}</p>
+                    <p style="margin: 0;">{{ schedule.session.time }}</p>
+                    <p style="margin: 0;">{{ schedule.session.date }}</p>
+                    <a href="{% url 'seat_selection' schedule.id %}">Выбрать места</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <p>Нет расписания для отображения.</p>
+    {% endif %}
 </body>
+
 </html>

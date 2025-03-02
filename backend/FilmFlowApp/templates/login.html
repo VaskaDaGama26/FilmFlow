@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Вход</title>
+</head>
+<body>
+    <h1>Вход</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit">Войти</button>
+    </form>
+    <a href="{% url 'register' %}">Еще нет аккаунта? Зарегистрироваться</a>
+</body>
+</html>

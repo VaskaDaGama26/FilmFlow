@@ -2,9 +2,21 @@
 <html>
 <head>
     <title>Список залов</title>
+    <style>
+        .past {
+            color: grey;
+        }
+    </style>
 </head>
 <body>
     <h1>Список залов</h1>
+    {% if user.is_authenticated %}
+            <a href="{% url 'user_tickets' %}">Мои билеты</a>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}"><button>Войти</button></a>
+        <a href="{% url 'register' %}"><button>Зарегистрироваться</button></a>
+    {% endif %}
     <ul>
         {% for room in rooms %}
             <li><a href="{% url 'room_schedule' room.id %}">{{ room.name }}</a></li>

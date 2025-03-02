@@ -1,21 +1,35 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-
-class User(models.Model):
-    email = models.EmailField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+    
+class Film(models.Model):
+    title = models.CharField(max_length=255)
+    poster = models.ImageField(upload_to='posters/')
 
     def __str__(self):
-        return f"{self.name}"
-    
+        return f"{self.title}"
+
 class Slot(models.Model):
     time = models.TimeField()
-    date = models.DateField()
 
     def __str__(self):
-        return f"TIME: {self.time}, DATE: {self.date}"
+        return f"{self.time}"
+
+class Session(models.Model):
+    film = models.ForeignKey(Film, on_delete=models.CASCADE, null=True)
+    time = models.ForeignKey(Slot, on_delete=models.CASCADE)
+    date = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.film} TIME: {self.time}, DATE: {self.date}"
+    def clean(self):
+        if Session.objects.filter(film=self.film, time=self.time, date=self.date).exists():
+            raise ValidationError('Сеанс с этим фильмом в это время и на эту дату уже существует.')
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(Session, self).save(*args, **kwargs)
 
 class Room(models.Model):
     name = models.CharField(max_length=255)
@@ -29,28 +43,26 @@ class Room(models.Model):
             for number in range(1, 9):
                 seats.append({'row': row, 'number': number})
         return seats
-
-class Film(models.Model):
-    title = models.CharField(max_length=255)
-    poster = models.ImageField(upload_to='posters/')
-
-    def __str__(self):
-        return f"{self.title}"
     
 class Schedule(models.Model):
-    film = models.ForeignKey(Film, on_delete=models.CASCADE)
-    slot = models.ForeignKey(Slot, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, null=True)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.film}, {self.slot}"
+        return f"{self.room}, {self.session}"
+    def clean(self):
+        if Schedule.objects.filter(room=self.room, session=self.session).exists():
+            raise ValidationError('Сеанс в это время уже существует в этом зале.')
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(Schedule, self).save(*args, **kwargs)
+
 
 class Seat(models.Model):
     row = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(8)])
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, blank=True)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE,default=1) 
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, null=True) 
 
     def __str__(self):
         return f"ROW: {self.row}, SEAT: {self.number}, SCHEDULE: {self.schedule}"
