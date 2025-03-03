@@ -16,8 +16,8 @@
         {% csrf_token %}
         <button type="submit">Выйти</button>
     </form>
-    <h1>Мои билеты</h1>
     <a href="{% url 'room_list' %}">Назад к списку залов</a>
+    <h1>Мои билеты</h1>
     {% if grouped_seats %}
     {% for date, day_seats in grouped_seats.items %}
     <h4>{{ date }}</h4>

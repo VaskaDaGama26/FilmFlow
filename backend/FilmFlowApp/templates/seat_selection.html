@@ -3,15 +3,29 @@
 
 <head>
     <title>Выбор мест</title>
+    <style>
+        .poster {
+            width: 200px;
+            height: 300px;
+        }
+        .icon-button {
+            background: none;
+            border: none;
+            font: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-button svg {
+            width: 24px; /* Размер иконки */
+            height: 24px; /* Размер иконки */
+        }
+    </style>
 </head>
-<style>
-    .poster {
-        width: 200px;
-        height: 300px;
-    }
-</style>
 
 <body>
+    {% load static %}
     <h1>Выбор мест {{ schedule.room }}</h1>
     <a href="{% url 'room_schedule' schedule.room.id %}">Назад к расписанию</a>
     <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 2rem;">
@@ -30,14 +44,14 @@
             {% endif %}
                 <td style="text-align: center;">
                     {% if seat.reserved %}
-                    <button style="background-color: red;" disabled>{{ seat.row }}-{{ seat.number }}</button>
+                    <button class="icon-button" disabled><img src="{% static 'icons/reservedSeat.svg' %}" alt="Reserved"></button>
                     {% elif user.is_authenticated %}
                     <a href="{% url 'book_seat' seat.row seat.number schedule.id %}?next={% url 'seat_selection' schedule.id %}">
-                        <button>{{ seat.row }}-{{ seat.number }}</button>
+                        <button class="icon-button"><img src="{% static 'icons/seat.svg' %}" alt="Available"></button>
                     </a>
                     {% else %}
                     <a href="{% url 'login' %}?next={% url 'seat_selection' schedule.id %}">
-                        <button>{{ seat.row }}-{{ seat.number }}</button>
+                        <button class="icon-button"><img src="{% static 'icons/seat.svg' %}" alt="Available"></button>
                     </a>
                     {% endif %}
                 </td>

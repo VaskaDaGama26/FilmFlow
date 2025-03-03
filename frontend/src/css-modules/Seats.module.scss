@@ -1,0 +1,159 @@
+@import './colors.scss';
+
+@media(max-width: 512px) {
+    .film {
+        padding: 2rem 0 0 1rem !important;
+
+        .datetime {
+            flex-direction: column !important;
+            gap: 0;
+    
+            p {
+                margin: 0 !important;
+            }
+        }
+    }
+    .screen {
+        width: 18rem;
+    }
+}
+
+.container {
+    width: 100%;
+}
+
+.room {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    
+}
+
+.film {
+    display: flex;
+    flex-direction: row; 
+    padding: 2rem 0 0 2rem;  
+
+    & .poster {
+        width: 120px;
+        height: 120px;
+        border-radius: 999px;
+        object-fit: cover;
+    }
+
+    & .specs {
+        margin-left: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: space-around;
+        color: white;
+    
+        & p {
+            margin: 0 0 1rem 0;
+            color: $white;
+            display: flex;
+            align-items: center;
+    
+            & img {
+                padding-right: .5rem;
+            }
+        }
+
+        & .datetime {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+        }
+
+        & .title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: $white;
+        }
+    }
+}
+
+table {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        & .icon__button {
+            padding: .2rem;
+            background: none;
+            border: none;
+            font: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        
+            & .receipt {
+                display: none;
+            }
+            
+            &:hover {
+        
+                & .seat {display: none;}
+                & .receipt {display: block;}
+            }
+        
+        
+        }
+    }
+
+.tip {
+    display: flex;
+    flex-direction: row;
+    margin-top: .5rem;
+    margin-bottom: 2rem;
+
+    & ul {
+        list-style: none; 
+        padding: 0; 
+        display: flex; 
+        flex-direction: row;
+        justify-content: center;
+
+        & li {
+            color: $white;
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            margin-right: 1rem;
+        }
+    }
+    .square {
+        width: 16px; 
+        height: 16px;  
+        margin-right: .5rem; 
+        border: 1px solid $darkgray; 
+        border-radius: 4px;
+    
+        &__reserved {
+            background-color: $secondary;
+        }
+        &__free {
+            background-color: $white;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
