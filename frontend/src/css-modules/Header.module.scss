@@ -1,16 +1,47 @@
-@import 'colors.scss';
+@import '../assets/colors.scss';
 
+@media (max-width: 1100px) {
 
-@media(max-width: 1100px) {
     .roomList__nav {
-        display: none !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
     }
+
     .auth {
+        margin-top: 2rem;
+        gap: 2rem;
+        flex-direction: column !important;
+        width: 100% !important;
+        align-items: center !important;
+
+        a {
+            margin: 0 !important;
+        }
+    }
+
+    .desktopMenu {
         display: none !important;
     }
-    .burger {
-        display: block !important;
+
+    .mobileMenu {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        position: relative;
     }
+
+    .burger {
+        margin-left: 1rem;
+        display: block !important;
+        cursor: pointer;
+    }
+    .close {
+        display: flex;
+        justify-content: end;
+        cursor: pointer;
+    }
+
     .logo img {
         max-width: 9rem !important;
     }
@@ -18,15 +49,44 @@
 
 .container {
     overflow-x: hidden;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
     padding: 1rem 2rem;
     background-color: $primary;
     box-shadow: 0 4px 8px $darkgray;
+    max-width: 1440px;
+    margin-inline: auto;
 
-    & .logo {
+    .desktopMenu {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .mobileMenu {
+        display: none;
+    }
+
+    .sideMenu {
+        display: flex;
+        flex-direction: column;
+        background-color: $primary;
+        gap: 2rem;
+        padding: 2rem;
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 16rem;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 1000;
+    }
+
+    .sideMenu.open {
+        transform: translateX(0);
+    }
+
+    .logo {
         display: flex;
         align-items: center;
         margin-right: .5rem;
@@ -50,11 +110,10 @@
         text-decoration: none;
         list-style-type: none;
 
-        & li {
+        li {
             font-size: 1rem;
 
-            & .link {
-
+            .link {
                 position: relative;
                 display: inline-block;
                 text-decoration: none;
@@ -82,17 +141,15 @@
         }
     }
 
-    & .auth {
+    .auth {
         display: flex;
 
-        & :not(:last-child) {
+        :not(:last-child) {
             margin-right: 1rem;
         }
     }
 
-    & .burger {
+    .burger {
         display: none;
-        margin-left: 1rem;
     }
 }
-

@@ -12,7 +12,12 @@ class Film(models.Model):
         return f"{self.title}"
 
 class Slot(models.Model):
-    time = models.TimeField()
+    time = models.CharField(max_length=5) 
+
+    def save(self, *args, **kwargs):
+        if ':' not in self.time and len(self.time) == 2:
+            self.time = f'{self.time}:00'
+        super(Slot, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.time}"

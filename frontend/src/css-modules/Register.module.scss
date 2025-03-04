@@ -1,6 +1,4 @@
-@import './colors.scss';
-
-@import 'colors.scss';
+@import '../assets/colors.scss';
 
 .container {
     margin-top: 15vh;
@@ -24,7 +22,6 @@
 
     & .form__group {
         margin-bottom: 1rem;
-        width: 100%;
 
         & label {
             display: block;
@@ -41,7 +38,10 @@
             color: $white;
         }
         & p {
+            font-size: .8rem;
             color: $white;
+            margin-top: .5rem;
+            margin-left: .5rem;
         }
         & li {
             color: white;
@@ -57,6 +57,7 @@
     display: inline-block;
     text-decoration: none;
     color: $white;
+    text-align: center;
 
     &::before {
         content: '';

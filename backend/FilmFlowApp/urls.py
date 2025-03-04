@@ -1,13 +1,24 @@
-from django.urls import path
-from .views import room_list, room_schedule, seat_selection, book_seat, user_tickets, register, user_login, user_logout
+from django.conf import settings
+from django.conf.urls.static import static
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import RoomListView, RoomScheduleView, SeatSelectionView, book_seat, UserTicketsView, RegisterView, LoginView, LogoutView
+
+router = DefaultRouter()
 
 urlpatterns = [
-    path('', room_list, name='room_list'),
-    path('rooms/<int:room_id>/', room_schedule, name='room_schedule'),
-    path('seats/<int:schedule_id>/', seat_selection, name='seat_selection'),
-    path('book/<int:seat_row>/<int:seat_number>/<int:schedule_id>/', book_seat, name='book_seat'),
-    path('register/', register, name='register'),
-    path('login/', user_login, name='login'),
-    path('logout/', user_logout, name='logout'),
-    path('tickets/', user_tickets, name='user_tickets'),
+    path('rooms/', RoomListView.as_view(), name='room_list'),
+    path('rooms/<int:room_id>', RoomScheduleView.as_view(), name='room_schedule'),
+    path('seat_selection/<int:pk>/', SeatSelectionView.as_view(), name='seat_selection'),
+    path('book_seat/<int:schedule_id>/<int:seat_row>/<int:seat_number>/', book_seat, name='book_seat'),
+    path('user_tickets/', UserTicketsView.as_view(), name='user_tickets'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += router.urls
+

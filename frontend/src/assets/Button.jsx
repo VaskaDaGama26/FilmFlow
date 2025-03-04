@@ -1,7 +1,7 @@
 import React from 'react'
 import './Button.scss'
 
-const Button = ({label, type = null}) => {
+const Button = ({label, type = null, onClick = null}) => {
   return (
     <button type={type} className='button'>{label}</button>
   )

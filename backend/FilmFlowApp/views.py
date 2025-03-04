@@ -1,105 +1,128 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from rest_framework import viewsets, generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate, login, logout
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import *
 from .models import *
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.utils import timezone
+from django.contrib.auth.models import User, Group
 from datetime import timedelta
 
-def room_list(request):
-    rooms = Room.objects.all()
-    return render(request, 'room_list.html', {'rooms': rooms})
+# Room List
+class RoomListView(generics.ListAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    permission_classes = [permissions.AllowAny]
 
-def get_grouped_schedules(schedules):
-    grouped_schedules = {}
-    for schedule in schedules:
-        date = schedule.session.date
-        if date not in grouped_schedules:
-            grouped_schedules[date] = []
-        grouped_schedules[date].append(schedule)
-    
-    for date, day_schedules in grouped_schedules.items():
-        day_schedules.sort(key=lambda x: x.session.time.time)
-    
-    return grouped_schedules
+# Room Schedule
+class RoomScheduleView(APIView):
+    permission_classes = [permissions.AllowAny]
 
-def room_schedule(request, room_id):
-    room = get_object_or_404(Room, id=room_id)
-    yesterday = timezone.now().date() - timedelta(days=1)
-    schedules = Schedule.objects.filter(room=room, session__date__gt=yesterday).order_by('session__date', 'session__time')
-    
-    grouped_schedules = get_grouped_schedules(schedules)
-    
-    return render(request, 'room_schedule.html', {'room': room, 'grouped_schedules': grouped_schedules})
+    def get(self, request, room_id):
+        room = get_object_or_404(Room, id=room_id)
+        yesterday = timezone.now().date() - timedelta(days=1)
+        schedules = Schedule.objects.filter(room=room, session__date__gt=yesterday).order_by('session__date', 'session__time')
 
-def seat_selection(request, schedule_id):
-    schedule = get_object_or_404(Schedule, id=schedule_id)
-    room = schedule.room
-    all_seats = room.generate_seats()
-    reserved_seats = Seat.objects.filter(schedule=schedule)
-    reserved_seats_set = {(seat.row, seat.number) for seat in reserved_seats}
-    
-    for seat in all_seats:
-        seat['reserved'] = (seat['row'], seat['number']) in reserved_seats_set
-    
-    return render(request, 'seat_selection.html', {'schedule': schedule, 'seat_map': all_seats})
+        grouped_schedules = self.get_grouped_schedules(schedules)
+        
+        response_data = {
+            'room': RoomSerializer(room).data,
+            'grouped_schedules': grouped_schedules
+        }
+        return Response(response_data)
 
-@login_required
+    def get_grouped_schedules(self, schedules):
+        grouped_schedules = []
+        for schedule in schedules:
+            grouped_schedules.append(schedule)
+        return ScheduleSerializer(grouped_schedules, many=True).data
+
+# Seat Selection
+class SeatSelectionView(generics.RetrieveAPIView):
+    queryset = Schedule.objects.all()
+    serializer_class = ScheduleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        schedule = self.get_object()
+        room = schedule.room
+        all_seats = room.generate_seats()
+        reserved_seats = Seat.objects.filter(schedule=schedule)
+        reserved_seats_set = {(seat.row, seat.number) for seat in reserved_seats}
+
+        for seat in all_seats:
+            seat['reserved'] = (seat['row'], seat['number']) in reserved_seats_set
+
+        return Response({
+            'schedule': ScheduleSerializer(schedule).data,
+            'seat_map': all_seats
+        })
+
+# Book Seat
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def book_seat(request, seat_row, seat_number, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id)
     seat, created = Seat.objects.get_or_create(row=seat_row, number=seat_number, schedule=schedule)
     if created:
         seat.user = request.user
         seat.save()
-    return redirect('seat_selection', schedule_id=schedule.id)
+    return Response(SeatSerializer(seat).data)
 
+# User Tickets
+class UserTicketsView(generics.ListAPIView):
+    serializer_class = SeatSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Seat.objects.filter(user=self.request.user)
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        grouped_seats = self.get_grouped_seats(queryset)
 
-@login_required
-def user_tickets(request):
-    today = timezone.now().date()
-    yesterday = today - timedelta(days=1)
-    
-    reserved_seats = Seat.objects.filter(user=request.user)
-    grouped_seats = {}
-    for seat in reserved_seats:
-        date = seat.schedule.session.date
-        if date not in grouped_seats:
-            grouped_seats[date] = []
-        grouped_seats[date].append(seat)
-    
-    grouped_seats = dict(sorted(grouped_seats.items(), reverse=True))
-    
-    return render(request, 'user_tickets.html', {'grouped_seats': grouped_seats, 'yesterday': yesterday})
+        return Response(grouped_seats)
 
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
+    def get_grouped_seats(self, reserved_seats):
+        grouped_seats = {}
+        for seat in reserved_seats:
+            date = seat.schedule.session.date
+            if date not in grouped_seats:
+                grouped_seats[date] = []
+            grouped_seats[date].append(seat)
+
+        grouped_seats = dict(sorted(grouped_seats.items(), reverse=True))
+
+        return grouped_seats
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
+
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(username=username, password=password)
+        if user is not None:
             login(request, user)
-            return redirect('room_list')
-    else:
-        form = UserCreationForm()
-    return render(request, 'register.html', {'form': form})
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'user': UserSerializer(user).data,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token)
+            })
+        return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
-def user_login(request):
-    next_url = request.GET.get('next', 'room_list') 
-    if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            next_url = request.POST.get('next', 'room_list')
-            return redirect(next_url)
-    else:
-        form = AuthenticationForm(initial={'next': next_url})
-    return render(request, 'login.html', {'form': form, 'next': next_url})
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-
-def user_logout(request):
-    logout(request)
-    return redirect('room_list')
+    def post(self, request):
+        logout(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)

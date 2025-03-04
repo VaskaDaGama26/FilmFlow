@@ -1,4 +1,4 @@
-@import './colors.scss';
+@import '../assets/colors.scss';
 
 @media(max-width: 512px) {
     .film {
@@ -7,12 +7,13 @@
         .datetime {
             flex-direction: column !important;
             gap: 0;
-    
+
             p {
                 margin: 0 !important;
             }
         }
     }
+
     .screen {
         width: 18rem;
     }
@@ -28,13 +29,13 @@
     justify-content: center;
     align-items: center;
     margin-top: 2rem;
-    
+
 }
 
 .film {
     display: flex;
-    flex-direction: row; 
-    padding: 2rem 0 0 2rem;  
+    flex-direction: row;
+    padding: 2rem 0 0 2rem;
 
     & .poster {
         width: 120px;
@@ -50,13 +51,13 @@
         align-items: start;
         justify-content: space-around;
         color: white;
-    
+
         & p {
             margin: 0 0 1rem 0;
             color: $white;
             display: flex;
             align-items: center;
-    
+
             & img {
                 padding-right: .5rem;
             }
@@ -77,33 +78,49 @@
 }
 
 table {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    & .icon__button {
+        padding: .2rem;
+        background: none;
+        border: none;
+        font: inherit;
+        cursor: pointer;
         display: flex;
-        flex-direction: row;
+        align-items: center;
         justify-content: center;
 
-        & .icon__button {
-            padding: .2rem;
-            background: none;
-            border: none;
-            font: inherit;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        
-            & .receipt {
+        & .receipt {
+            display: none;
+        }
+
+        &:hover {
+
+            & .seat {
                 display: none;
             }
-            
-            &:hover {
-        
-                & .seat {display: none;}
-                & .receipt {display: block;}
+
+            & .receipt {
+                display: block;
             }
-        
-        
         }
+
+
     }
+
+    & .icon__button__reserved {
+        padding: .2rem;
+        background: none;
+        border: none;
+        font: inherit;
+        cursor: default;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
 
 .tip {
     display: flex;
@@ -112,48 +129,34 @@ table {
     margin-bottom: 2rem;
 
     & ul {
-        list-style: none; 
-        padding: 0; 
-        display: flex; 
+        list-style: none;
+        padding: 0;
+        display: flex;
         flex-direction: row;
         justify-content: center;
 
         & li {
             color: $white;
-            display: flex; 
-            flex-direction: row; 
-            align-items: center; 
+            display: flex;
+            flex-direction: row;
+            align-items: center;
             margin-right: 1rem;
         }
     }
+
     .square {
-        width: 16px; 
-        height: 16px;  
-        margin-right: .5rem; 
-        border: 1px solid $darkgray; 
+        width: 16px;
+        height: 16px;
+        margin-right: .5rem;
+        border: 1px solid $darkgray;
         border-radius: 4px;
-    
+
         &__reserved {
             background-color: $secondary;
         }
+
         &__free {
             background-color: $white;
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
